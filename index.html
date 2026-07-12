@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Membership Recruitment Content Calendar</title>
+<style>
+  :root {
+    --bg: #f6f5f2;
+    --surface: #ffffff;
+    --text: #1f2430;
+    --muted: #5c6270;
+    --border: #e2e0da;
+    --accent: #b5502f;
+    --accent-soft: #f1e3da;
+    --testimonial: #2f6b4f;
+    --testimonial-bg: #e7f0ea;
+    --benefit: #1f5fa8;
+    --benefit-bg: #e5eef8;
+    --urgency: #a4302a;
+    --urgency-bg: #f8e6e4;
+    --bts: #7a5a1e;
+    --bts-bg: #f3ecd9;
+    --shadow: 0 1px 2px rgba(31,36,48,.06), 0 8px 24px rgba(31,36,48,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181c;
+      --surface: #201f24;
+      --text: #ece9e4;
+      --muted: #a3a0ab;
+      --border: #35333b;
+      --accent: #e08a63;
+      --accent-soft: #3a2a20;
+      --testimonial: #7cc79f;
+      --testimonial-bg: #1f3327;
+      --benefit: #7fb2e8;
+      --benefit-bg: #1c2c3d;
+      --urgency: #e5827a;
+      --urgency-bg: #3a2220;
+      --bts: #d8b769;
+      --bts-bg: #33291a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17181c; --surface: #201f24; --text: #ece9e4; --muted: #a3a0ab; --border: #35333b;
+    --accent: #e08a63; --accent-soft: #3a2a20;
+    --testimonial: #7cc79f; --testimonial-bg: #1f3327;
+    --benefit: #7fb2e8; --benefit-bg: #1c2c3d;
+    --urgency: #e5827a; --urgency-bg: #3a2220;
+    --bts: #d8b769; --bts-bg: #33291a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f5f2; --surface: #ffffff; --text: #1f2430; --muted: #5c6270; --border: #e2e0da;
+    --accent: #b5502f; --accent-soft: #f1e3da;
+    --testimonial: #2f6b4f; --testimonial-bg: #e7f0ea;
+    --benefit: #1f5fa8; --benefit-bg: #e5eef8;
+    --urgency: #a4302a; --urgency-bg: #f8e6e4;
+    --bts: #7a5a1e; --bts-bg: #f3ecd9;
+    --shadow: 0 1px 2px rgba(31,36,48,.06), 0 8px 24px rgba(31,36,48,.06);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.45;
+  }
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 5rem;
+  }
+  header.page-header {
+    margin-bottom: 1.75rem;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin: 0 0 .35rem;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: .95rem;
+    max-width: 60ch;
+  }
+
+  form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem 1.25rem;
+    align-items: end;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+  }
+  label {
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted);
+  }
+  input, select {
+    font: inherit;
+    padding: .6rem .7rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+  }
+  input:focus, select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  button {
+    font: inherit;
+    font-weight: 600;
+    padding: .65rem 1.1rem;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  button:hover { filter: brightness(1.05); }
+  button.secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  #output { margin-top: 2.25rem; }
+  .output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: .75rem;
+    margin-bottom: 1rem;
+  }
+  .output-header h2 {
+    font-size: 1.15rem;
+    margin: 0;
+  }
+  .output-header .meta {
+    color: var(--muted);
+    font-size: .85rem;
+  }
+  .actions { display: flex; gap: .5rem; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1.25rem;
+  }
+  .chip {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    padding: .3rem .6rem;
+    border-radius: 999px;
+  }
+  .chip.testimonial { color: var(--testimonial); background: var(--testimonial-bg); }
+  .chip.benefit { color: var(--benefit); background: var(--benefit-bg); }
+  .chip.urgency { color: var(--urgency); background: var(--urgency-bg); }
+  .chip.bts { color: var(--bts); background: var(--bts-bg); }
+
+  .week-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: .85rem;
+    box-shadow: var(--shadow);
+  }
+  .week-card .row1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-bottom: .4rem;
+  }
+  .week-label {
+    font-weight: 700;
+    font-size: .95rem;
+  }
+  .date-range {
+    color: var(--muted);
+    font-size: .82rem;
+  }
+  .week-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: .1rem 0 .5rem;
+  }
+  ul.ideas {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  ul.ideas li {
+    margin-bottom: .3rem;
+    font-size: .92rem;
+  }
+  ul.ideas li:last-child { margin-bottom: 0; }
+
+  footer.note {
+    margin-top: 2rem;
+    color: var(--muted);
+    font-size: .8rem;
+    text-align: center;
+  }
+
+  @media print {
+    form, .actions, footer.note { display: none !important; }
+    body { background: #fff; color: #000; }
+    .week-card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page-header">
+    <h1>Membership Recruitment Content Calendar</h1>
+    <p class="sub">Enter your organization details to generate a 12-week social content calendar — a rotating mix of member testimonials, benefit highlights, urgency/deadline posts, and behind-the-scenes content.</p>
+  </header>
+
+  <form id="calForm">
+    <div class="field">
+      <label for="orgName">Organization name</label>
+      <input type="text" id="orgName" placeholder="e.g. Riverside Rotary Club" required>
+    </div>
+    <div class="field">
+      <label for="goal">Membership goal</label>
+      <input type="number" id="goal" min="1" placeholder="e.g. 50" required>
+    </div>
+    <div class="field">
+      <label for="quarter">Quarter</label>
+      <select id="quarter">
+        <option value="1">Q1 (Jan–Mar)</option>
+        <option value="2">Q2 (Apr–Jun)</option>
+        <option value="3" selected>Q3 (Jul–Sep)</option>
+        <option value="4">Q4 (Oct–Dec)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="year">Year</label>
+      <input type="number" id="year" value="2026" min="2020" max="2100">
+    </div>
+    <div class="field">
+      <button type="submit">Generate calendar</button>
+    </div>
+  </form>
+
+  <div id="output" class="hidden">
+    <div class="output-header">
+      <div>
+        <h2 id="outTitle"></h2>
+        <div class="meta" id="outMeta"></div>
+      </div>
+      <div class="actions">
+        <button type="button" class="secondary" onclick="window.print()">Print / Save PDF</button>
+        <button type="button" class="secondary" id="downloadBtn">Download .txt</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="chip bts">Behind-the-scenes</span>
+      <span class="chip benefit">Benefit highlight</span>
+      <span class="chip testimonial">Testimonial</span>
+      <span class="chip urgency">Urgency / deadline</span>
+    </div>
+    <div id="weeks"></div>
+  </div>
+
+  <footer class="note">Generated calendars are a starting point — adjust dates, copy, and channels to fit your organization's voice.</footer>
+</div>
+
+<script>
+const THEME_META = {
+  bts:         { label: "Behind-the-scenes", className: "bts" },
+  benefit:     { label: "Benefit highlight",  className: "benefit" },
+  testimonial: { label: "Testimonial",        className: "testimonial" },
+  urgency:     { label: "Urgency / deadline", className: "urgency" }
+};
+
+// 12-week rotation: mix of all four themes, escalating urgency toward the deadline.
+const PLAN = [
+  { theme: "bts",         title: "Why we're recruiting this quarter",
+    ideas: [
+      "Behind-the-scenes post from a leadership meeting: share why {org} set a goal of {goal} new members this quarter.",
+      "Short video/photo tour of {org}'s space or a recent event, captioned with the season's recruitment kickoff.",
+      "Introduce the recruitment team members and their roles in one carousel post." ] },
+  { theme: "benefit",      title: "Benefit spotlight: what members get",
+    ideas: [
+      "Single-graphic post listing the top 3 tangible benefits of joining {org}.",
+      "Short-form video: a current member explains their favorite perk in 30 seconds.",
+      "FAQ-style post answering 'What do I actually get for my dues?'" ] },
+  { theme: "testimonial",  title: "Member story: how {org} changed things",
+    ideas: [
+      "Quote card from a longtime member on why they joined and stayed.",
+      "Short interview clip: 'One thing I didn't expect from {org}.'",
+      "Repost/share a member's own social post about {org}, with their permission." ] },
+  { theme: "benefit",      title: "Benefit spotlight: community & connections",
+    ideas: [
+      "Post highlighting networking or social benefits — events, mixers, mentorship.",
+      "Before/after style post: 'Without {org}' vs 'With {org}'.",
+      "Carousel: 5 things members can access that non-members can't." ] },
+  { theme: "bts",          title: "A day in the life at {org}",
+    ideas: [
+      "Photo/video series following a staff or board member through a typical event day.",
+      "Time-lapse or stop-motion of event setup for an upcoming {org} gathering.",
+      "Post about a recent win or milestone the team is proud of." ] },
+  { theme: "testimonial",  title: "Member story: results & impact",
+    ideas: [
+      "Testimonial focused on a concrete outcome (a skill gained, a connection made, a goal reached).",
+      "Short video where a member answers 'Who should join {org}?'",
+      "Quote graphic paired with a photo from a recent {org} event." ] },
+  { theme: "urgency",      title: "Halfway point: {goal} members and counting",
+    ideas: [
+      "Progress-update graphic: how many new members have joined so far vs. the goal of {goal}.",
+      "Post reminding followers of the quarter's application/enrollment deadline.",
+      "'Ask a friend' post encouraging current members to refer someone before the deadline." ] },
+  { theme: "benefit",      title: "Benefit spotlight: growth & opportunity",
+    ideas: [
+      "Post on professional development, leadership, or skill-building opportunities at {org}.",
+      "Highlight any discounts, resources, or exclusive access members receive.",
+      "Short video: 'Here's what I learned from being part of {org}.'" ] },
+  { theme: "bts",          title: "Meet the people behind {org}",
+    ideas: [
+      "Staff/board meet-the-team post — photos and one fun fact each.",
+      "Behind-the-scenes look at how membership applications get reviewed or welcomed.",
+      "Post about a recent volunteer or committee effort in progress." ] },
+  { theme: "testimonial",  title: "Member story: why I stayed",
+    ideas: [
+      "Testimonial from a member who renewed or has been with {org} for years.",
+      "Post pairing two testimonials — a new member and a veteran member — side by side.",
+      "Video reel: rapid-fire member answers to 'One word for {org}.'" ] },
+  { theme: "urgency",      title: "Final week: don't miss the deadline",
+    ideas: [
+      "Countdown graphic: 'X days left to join {org} this quarter.'",
+      "Post directly addressing hesitation: 'Still thinking about it? Here's what to know before you decide.'",
+      "Reminder post with a direct link/QR code to the membership application." ] },
+  { theme: "urgency",      title: "Last call: goal of {goal} members closes today",
+    ideas: [
+      "Final countdown post — deadline day, clear call-to-action and application link.",
+      "Thank-you post to everyone who joined this quarter, with the final tally toward the goal of {goal}.",
+      "Last-chance story/post stack: 3 quick reasons to join before the window closes." ] }
+];
+
+function fillTemplate(str, org, goal) {
+  return str.replace(/\{org\}/g, org).replace(/\{goal\}/g, goal);
+}
+
+function quarterStartDate(year, quarter) {
+  const startMonth = (quarter - 1) * 3; // 0-indexed
+  const d = new Date(year, startMonth, 1);
+  // move to the first Monday on/after the 1st
+  const day = d.getDay(); // 0 Sun .. 6 Sat
+  const offset = (day === 0) ? 1 : (day === 1 ? 0 : 8 - day);
+  d.setDate(d.getDate() + offset);
+  return d;
+}
+
+function fmtDate(d) {
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function buildCalendar(org, goal, quarter, year) {
+  const start = quarterStartDate(year, quarter);
+  const weeks = [];
+  for (let i = 0; i < 12; i++) {
+    const weekStart = new Date(start);
+    weekStart.setDate(start.getDate() + i * 7);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const plan = PLAN[i];
+    weeks.push({
+      num: i + 1,
+      start: weekStart,
+      end: weekEnd,
+      theme: plan.theme,
+      title: fillTemplate(plan.title, org, goal),
+      ideas: plan.ideas.map(s => fillTemplate(s, org, goal))
+    });
+  }
+  return weeks;
+}
+
+function render(weeks, org, goal, quarter, year) {
+  const out = document.getElementById("output");
+  out.classList.remove("hidden");
+  document.getElementById("outTitle").textContent = `${org} — Q${quarter} ${year} Recruitment Calendar`;
+  document.getElementById("outMeta").textContent =
+    `Goal: ${goal} new members · ${fmtDate(weeks[0].start)} – ${fmtDate(weeks[11].end)}`;
+
+  const container = document.getElementById("weeks");
+  container.innerHTML = "";
+  weeks.forEach(w => {
+    const meta = THEME_META[w.theme];
+    const card = document.createElement("div");
+    card.className = "week-card";
+    card.innerHTML = `
+      <div class="row1">
+        <span class="week-label">Week ${w.num}</span>
+        <span class="chip ${meta.className}">${meta.label}</span>
+        <span class="date-range">${fmtDate(w.start)} – ${fmtDate(w.end)}</span>
+      </div>
+      <div class="week-title">${w.title}</div>
+      <ul class="ideas">${w.ideas.map(i => `<li>${i}</li>`).join("")}</ul>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function toPlainText(weeks, org, goal, quarter, year) {
+  let lines = [];
+  lines.push(`${org} — Q${quarter} ${year} Recruitment Content Calendar`);
+  lines.push(`Goal: ${goal} new members  |  ${fmtDate(weeks[0].start)} – ${fmtDate(weeks[11].end)}`);
+  lines.push("");
+  weeks.forEach(w => {
+    lines.push(`Week ${w.num} (${fmtDate(w.start)}–${fmtDate(w.end)}) — ${THEME_META[w.theme].label}`);
+    lines.push(w.title);
+    w.ideas.forEach(i => lines.push(`  - ${i}`));
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+
+let lastWeeks = null, lastMeta = null;
+
+document.getElementById("calForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const org = document.getElementById("orgName").value.trim() || "Your Organization";
+  const goal = document.getElementById("goal").value.trim() || "N";
+  const quarter = parseInt(document.getElementById("quarter").value, 10);
+  const year = parseInt(document.getElementById("year").value, 10) || new Date().getFullYear();
+
+  const weeks = buildCalendar(org, goal, quarter, year);
+  render(weeks, org, goal, quarter, year);
+  lastWeeks = weeks;
+  lastMeta = { org, goal, quarter, year };
+
+  document.getElementById("output").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+document.getElementById("downloadBtn").addEventListener("click", function () {
+  if (!lastWeeks) return;
+  const text = toPlainText(lastWeeks, lastMeta.org, lastMeta.goal, lastMeta.quarter, lastMeta.year);
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${lastMeta.org.replace(/\s+/g, "-").toLowerCase()}-q${lastMeta.quarter}-${lastMeta.year}-content-calendar.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
