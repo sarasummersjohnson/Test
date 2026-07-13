@@ -233,3 +233,81 @@ select {
   border-radius: 6px;
   padding: 8px 16px;
 }
+
+.mode-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e2e2;
+}
+
+.mode-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 4px;
+  margin-right: 16px;
+  color: #777;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.mode-tab.active {
+  color: #1a1a1a;
+  border-bottom-color: #1a1a1a;
+}
+
+.field-warning {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #9a6700;
+}
+
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.calendar-toolbar button {
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+}
+
+.calendar-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.calendar-table th,
+.calendar-table td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.calendar-table th {
+  background: #f2f2f2;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #666;
+  white-space: nowrap;
+}
+
+.calendar-table td:first-child {
+  white-space: nowrap;
+}

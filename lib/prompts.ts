@@ -11,13 +11,19 @@ export type CaptionRequestInput = {
   toneNote?: string
 }
 
+function fallbackFields(input: CaptionRequestInput) {
+  return {
+    mission:
+      input.missionStatement?.trim() ||
+      'Not provided — infer something reasonable and general for a community nonprofit.',
+    event:
+      input.event?.trim() || 'None specified — do not reference a specific event or campaign.',
+    tone: input.toneNote?.trim() || 'Warm and community-focused (default).',
+  }
+}
+
 export function buildUserMessage(input: CaptionRequestInput, pillars: Pillar[]): string {
-  const mission =
-    input.missionStatement?.trim() ||
-    'Not provided — infer something reasonable and general for a community nonprofit.'
-  const event =
-    input.event?.trim() || 'None specified — do not reference a specific event or campaign.'
-  const tone = input.toneNote?.trim() || 'Warm and community-focused (default).'
+  const { mission, event, tone } = fallbackFields(input)
 
   const pillarList = pillars
     .map((pillar) => `- ${pillar.label} (${pillar.key}): ${pillar.description}`)
@@ -32,6 +38,43 @@ Generate one caption for each of the following content pillars:
 ${pillarList}
 
 Respond ONLY with a JSON array, no markdown code fences, no preamble or explanation. Each item must be shaped as: {"pillar": "<pillar key>", "caption": "<caption text>"}`
+}
+
+export type CalendarPostInput = {
+  index: number
+  date: string
+  pillar: Pillar
+}
+
+/**
+ * One batched prompt covering every scheduled post, so the model can keep
+ * voice/tone coherent across the whole calendar and we pay for a single
+ * request instead of one call per post. The model only needs to echo back
+ * `index` + `caption` — date and pillar are already known server-side, so
+ * there's no reason to spend output tokens re-stating them.
+ */
+export function buildCalendarUserMessage(
+  input: CaptionRequestInput,
+  posts: CalendarPostInput[],
+): string {
+  const { mission, event, tone } = fallbackFields(input)
+
+  const postList = posts
+    .map(
+      (post) =>
+        `${post.index}. ${post.date} — ${post.pillar.label} (${post.pillar.key}): ${post.pillar.description}`,
+    )
+    .join('\n')
+
+  return `Organization: ${input.orgName}
+Mission: ${mission}
+Upcoming event/campaign: ${event}
+Tone note: ${tone}
+
+Generate one caption for each scheduled post below, in order. Each post is dated and assigned a content pillar — write a caption appropriate to that specific pillar. Keep voice and tone consistent across the whole calendar, and avoid repeating the same phrasing or opening line across posts.
+${postList}
+
+Respond ONLY with a JSON array, no markdown code fences, no preamble or explanation. Each item must be shaped as: {"index": <post number>, "caption": "<caption text>"}`
 }
 
 /**
