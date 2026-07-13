@@ -8,7 +8,7 @@ const MAX_POSTS_PER_WEEK = 5
 const DEFAULT_POSTS_PER_WEEK = 2
 const DEFAULT_WEEKS = 4
 const MIN_WEEKS = 1
-const MAX_WEEKS = 12
+const MAX_WEEKS = 13 // a fiscal quarter: 52-week year / 4
 
 type Props = {
   accessCode: string

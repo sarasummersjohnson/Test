@@ -15,9 +15,10 @@ const DEFAULT_POSTS_PER_WEEK = 2
 // A single batched call requests captions for every post at once, so the
 // calendar length is capped to keep that one request's token count and
 // runtime bounded (avoids Vercel function timeouts / SDK HTTP timeouts on a
-// very large non-streaming request). 12 weeks x 5 posts/week = 60 posts max.
+// very large non-streaming request). 13 weeks = one fiscal quarter (52-week
+// year / 4); at 5 posts/week that's 65 posts max in a single call.
 const MIN_WEEKS = 1
-const MAX_WEEKS = 12
+const MAX_WEEKS = 13
 
 export async function OPTIONS(req: NextRequest) {
   return new NextResponse(null, { status: 204, headers: corsHeaders(req) })
