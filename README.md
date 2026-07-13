@@ -4,11 +4,25 @@ Password-protected internal tool for generating social media captions for nonpro
 
 ## How it's put together
 
-- **`app/page.tsx`** — login screen, then the caption-generation form and results. Login is stateless: entering a valid access code stores it in `sessionStorage`, and it's re-sent with every `/api/generate` call (no cookies, no server session). This is also what lets the Squarespace embed work without cross-origin cookie issues.
+- **`app/page.tsx`** — login screen, then a two-tab UI: **Single batch** (the original form) and **Posting calendar** (see below). Login is stateless: entering a valid access code stores it in `sessionStorage`, and it's re-sent with every API call (no cookies, no server session). This is also what lets the Squarespace embed work without cross-origin cookie issues.
 - **`app/admin/page.tsx`** — separate login gated by the `ADMIN` code, showing per-access-code usage counts.
-- **`app/api/generate/route.ts`** — the only route that calls Claude. Validates the access code on every request, builds the prompt server-side, calls the Anthropic Messages API, and increments the usage counter.
+- **`app/api/generate/route.ts`** — single-batch generation. Validates the access code on every request, builds the prompt server-side, calls the Anthropic Messages API, and increments the usage counter.
+- **`app/api/generate-calendar/route.ts`** — posting-calendar generation (see below).
+- **`app/api/generate-calendar/export/route.ts`** — formats an already-generated calendar into a downloadable `.xlsx`. Pure formatting, no Claude call.
 - **`lib/pillars.ts`** and **`lib/prompts.ts`** — server-only. These hold the actual pillar descriptions and system/user prompt templates (the "core IP") and are only ever imported from API route files, so they never end up in the client JS bundle. `lib/pillarsPublic.ts` holds just the pillar keys/labels needed to render the Combined-content checkboxes client-side.
+- **`lib/calendarSequencing.ts`** — pure date/pillar-sequencing logic for the posting calendar (no prompt content, so it carries no IP).
+- **`lib/excelExport.ts`** — builds the `.xlsx` workbook for calendar downloads.
 - **`lib/usage.ts`** — usage counters, stored in Upstash Redis (see below).
+
+## Posting calendar mode
+
+Given a start date, a number of weeks, and posts per week, this generates a full content calendar in one shot instead of one caption at a time:
+
+1. **Sequencing** (`lib/calendarSequencing.ts`, runs server-side before any model call): dates are spread evenly across each week (e.g. at 2/week, posts land ~3-4 days apart); pillars are assigned in a repeating membership/membership/donor pattern — an exact 2:1 ratio for post counts divisible by 3, close to it otherwise — and the same specific pillar is never assigned to two posts in a row.
+2. **One batched Claude call**: every post's date + pillar is included in a single prompt, and the model returns a JSON array of `{index, caption}` for the whole calendar at once — not one API call per post. This keeps voice consistent across the batch and is far cheaper than N separate calls. `max_tokens` scales with the number of posts (roughly 130 tokens/post + overhead, capped at 8000) so longer calendars don't get truncated.
+3. **Excel export**: the generated posts (already in the browser, no re-generation) are POSTed to `/api/generate-calendar/export`, which returns an `.xlsx` with columns **Date, Day, Content Pillar, Category, Caption** — one row per post. This is a default structure (no existing template was provided) — see `lib/excelExport.ts` if you need to match a specific one.
+
+**Validation:** Posts per week is clamped to **1–5** (default 2) both client-side (as you type, with an inline message if you go out of range) and server-side (the API rejects out-of-range or non-integer values even if a client bypasses the UI). Number of weeks is similarly bounded to **1–12** — this cap exists because the whole calendar is generated in a single non-streaming API call, and an unbounded calendar length risks truncated output or a request that runs long enough to hit a serverless function timeout. Both bounds live at the top of `app/api/generate-calendar/route.ts` if you want to change them.
 
 ## Environment variables
 
