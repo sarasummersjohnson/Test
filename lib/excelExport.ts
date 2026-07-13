@@ -1,9 +1,11 @@
-// Server-side only. Column structure below is a reasonable default — no
-// existing Excel template was provided, so this isn't matched to one. If
-// you have a specific template (column names/order, extra fields like
-// Platform or Status), adjust the `columns` list and the `sheet.addRow`
-// call below; everything else in the calendar feature is independent of
-// this file.
+// Server-side only. Column structure matches the client's existing content-
+// calendar delivery template: Date, Pillar, Track, Visual Label,
+// Visual/Template Needed, Caption, Notes.
+//
+// "Visual Label" and "Visual/Template Needed" describe what creative asset
+// a post needs — a judgment call made by whoever's building the visuals,
+// not something inferred from the pillar/caption alone — so those columns
+// (and Notes) are left blank for manual completion after export.
 
 import ExcelJS from 'exceljs'
 
@@ -23,25 +25,24 @@ export async function buildCalendarWorkbook(rows: CalendarPostRow[]): Promise<Bu
 
   sheet.columns = [
     { header: 'Date', key: 'date', width: 14 },
-    { header: 'Day', key: 'day', width: 12 },
-    { header: 'Content Pillar', key: 'pillar', width: 22 },
-    { header: 'Category', key: 'category', width: 14 },
+    { header: 'Pillar', key: 'pillar', width: 22 },
+    { header: 'Track', key: 'track', width: 14 },
+    { header: 'Visual Label', key: 'visualLabel', width: 24 },
+    { header: 'Visual/Template Needed', key: 'visualTemplateNeeded', width: 28 },
     { header: 'Caption', key: 'caption', width: 90 },
+    { header: 'Notes', key: 'notes', width: 30 },
   ]
   sheet.getRow(1).font = { bold: true }
 
   for (const row of rows) {
-    const dateObj = new Date(`${row.date}T00:00:00Z`)
-    const day = Number.isNaN(dateObj.getTime())
-      ? ''
-      : dateObj.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })
-
     const addedRow = sheet.addRow({
       date: row.date,
-      day,
       pillar: row.pillarLabel,
-      category: row.category === 'membership' ? 'Membership' : 'Donor',
+      track: row.category === 'membership' ? 'Membership' : 'Donor',
+      visualLabel: '',
+      visualTemplateNeeded: '',
       caption: row.caption,
+      notes: '',
     })
     addedRow.alignment = { wrapText: true, vertical: 'top' }
   }
