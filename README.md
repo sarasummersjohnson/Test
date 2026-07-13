@@ -47,11 +47,11 @@ To set it up:
 
 Hardcoded in `lib/accessCodes.ts` for now (no database):
 
-- `DEMO2026` — Demo / Preview Access
-- `KIRA-MG` — Kira — Maple Grove Rotary
+- `DEMO2026` — Demo / Preview Access. Standing testing/preview code, not a consultant slot.
+- `CONSULT-1` through `CONSULT-5` — consultant slots. `CONSULT-1` is Kira at Maple Grove Rotary (renamed from the old `KIRA-MG` code, same person); `CONSULT-2`–`CONSULT-5` are unassigned and ready to hand out.
 - `ADMIN` (in `lib/accessCodes.ts` as `ADMIN_CODE`) — routes to `/admin` instead of the generator, and is excluded from the usage list.
 
-To add a client, add an entry to `ACCESS_CODES` in `lib/accessCodes.ts`.
+To add a 6th consultant, add one line to `ACCESS_CODES` in `lib/accessCodes.ts`.
 
 ## Editing the pillars / prompt
 
