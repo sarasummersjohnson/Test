@@ -20,6 +20,7 @@ export default function CaptionForm({ accessCode, onResults }: Props) {
   const [missionStatement, setMissionStatement] = useState('')
   const [event, setEvent] = useState('')
   const [toneNote, setToneNote] = useState('')
+  const [keyFacts, setKeyFacts] = useState('')
   const [selectedPillars, setSelectedPillars] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -60,6 +61,7 @@ export default function CaptionForm({ accessCode, onResults }: Props) {
           missionStatement: missionStatement.trim(),
           event: event.trim(),
           toneNote: toneNote.trim(),
+          keyFacts: keyFacts.trim(),
           pillars: contentType === 'Combined' ? selectedPillars : undefined,
         }),
       })
@@ -123,6 +125,16 @@ export default function CaptionForm({ accessCode, onResults }: Props) {
           value={toneNote}
           onChange={(e) => setToneNote(e.target.value)}
           placeholder="Optional — e.g. playful, formal, urgent"
+        />
+      </label>
+
+      <label>
+        Details to include
+        <textarea
+          value={keyFacts}
+          onChange={(e) => setKeyFacts(e.target.value)}
+          rows={4}
+          placeholder="Optional — real names, quotes, or numbers to work into the captions (e.g. from a client intake survey). Only what you enter here gets used; nothing gets invented."
         />
       </label>
 

@@ -9,6 +9,7 @@ export type CaptionRequestInput = {
   missionStatement?: string
   event?: string
   toneNote?: string
+  keyFacts?: string
 }
 
 function fallbackFields(input: CaptionRequestInput) {
@@ -19,11 +20,14 @@ function fallbackFields(input: CaptionRequestInput) {
     event:
       input.event?.trim() || 'None specified — do not reference a specific event or campaign.',
     tone: input.toneNote?.trim() || 'Warm and community-focused (default).',
+    keyFacts:
+      input.keyFacts?.trim() ||
+      'None provided — do not invent specific names, quotes, or numbers; keep captions general instead.',
   }
 }
 
 export function buildUserMessage(input: CaptionRequestInput, pillars: Pillar[]): string {
-  const { mission, event, tone } = fallbackFields(input)
+  const { mission, event, tone, keyFacts } = fallbackFields(input)
 
   const pillarList = pillars
     .map((pillar) => `- ${pillar.label} (${pillar.key}): ${pillar.description}`)
@@ -33,8 +37,10 @@ export function buildUserMessage(input: CaptionRequestInput, pillars: Pillar[]):
 Mission: ${mission}
 Upcoming event/campaign: ${event}
 Tone note: ${tone}
+Details to draw from (real names, quotes, numbers — use only what's given here; if nothing here fits a particular pillar, keep that caption general rather than inventing specifics):
+${keyFacts}
 
-Generate one complete, ready-to-post caption for each of the following content pillars. Each caption must be the full text a social media manager would copy and paste directly into a post — never a headline, title, summary, or description of what the caption should say. Ground each caption specifically in that pillar's description below, not just its name.
+Generate one complete, ready-to-post caption for each of the following content pillars. Each caption must be the full text a social media manager would copy and paste directly into a post — never a headline, title, summary, or description of what the caption should say. Ground each caption specifically in that pillar's description below, not just its name — and in whichever provided detail above best fits that pillar, if any does.
 ${pillarList}
 
 Respond ONLY with a JSON array, no markdown code fences, no preamble or explanation. Each item must be shaped as: {"pillar": "<pillar key>", "caption": "<caption text>"}`
@@ -57,7 +63,7 @@ export function buildCalendarUserMessage(
   input: CaptionRequestInput,
   posts: CalendarPostInput[],
 ): string {
-  const { mission, event, tone } = fallbackFields(input)
+  const { mission, event, tone, keyFacts } = fallbackFields(input)
 
   const postList = posts
     .map(
@@ -70,8 +76,10 @@ export function buildCalendarUserMessage(
 Mission: ${mission}
 Upcoming event/campaign: ${event}
 Tone note: ${tone}
+Details to draw from (real names, quotes, numbers — use only what's given here; if nothing here fits a particular post, keep that caption general rather than inventing specifics):
+${keyFacts}
 
-Generate one complete, ready-to-post caption for each scheduled post below, in order. Each caption must be the full text a social media manager would copy and paste directly into a post — never a headline, title, summary, or description of what the caption should say. Each post is dated and assigned a content pillar — ground the caption specifically in that pillar's description, not just its name. Keep voice and tone consistent across the whole calendar, and avoid repeating the same phrasing or opening line across posts.
+Generate one complete, ready-to-post caption for each scheduled post below, in order. Each caption must be the full text a social media manager would copy and paste directly into a post — never a headline, title, summary, or description of what the caption should say. Each post is dated and assigned a content pillar — ground the caption specifically in that pillar's description, and in whichever provided detail above best fits it, if any does. Don't reuse the same specific detail (e.g. the same member's name, or the same stat) across multiple posts unless it's the only one available. Keep voice and tone consistent across the whole calendar, and avoid repeating the same phrasing or opening line across posts.
 ${postList}
 
 Respond ONLY with a JSON array, no markdown code fences, no preamble or explanation. Each item must be shaped as: {"index": <post number>, "caption": "<caption text>"}`

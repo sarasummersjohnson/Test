@@ -24,6 +24,7 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
   const [missionStatement, setMissionStatement] = useState('')
   const [event, setEvent] = useState('')
   const [toneNote, setToneNote] = useState('')
+  const [keyFacts, setKeyFacts] = useState('')
   const [startDate, setStartDate] = useState(todayISO())
 
   const [weeks, setWeeks] = useState<number>(DEFAULT_WEEKS)
@@ -107,6 +108,7 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
           missionStatement: missionStatement.trim(),
           event: event.trim(),
           toneNote: toneNote.trim(),
+          keyFacts: keyFacts.trim(),
           startDate,
           weeks: safeWeeks,
           postsPerWeek: safePostsPerWeek,
@@ -158,6 +160,16 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
           value={toneNote}
           onChange={(e) => setToneNote(e.target.value)}
           placeholder="Optional — e.g. playful, formal, urgent"
+        />
+      </label>
+
+      <label>
+        Details to include
+        <textarea
+          value={keyFacts}
+          onChange={(e) => setKeyFacts(e.target.value)}
+          rows={4}
+          placeholder="Optional — real names, quotes, or numbers to work into the captions across the calendar (e.g. from a client intake survey). Only what you enter here gets used; nothing gets invented."
         />
       </label>
 

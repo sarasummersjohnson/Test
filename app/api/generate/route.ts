@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     missionStatement,
     event,
     toneNote,
+    keyFacts,
     pillars: selectedPillarKeys,
   } = body ?? {}
 
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
       missionStatement: typeof missionStatement === 'string' ? missionStatement : undefined,
       event: typeof event === 'string' ? event : undefined,
       toneNote: typeof toneNote === 'string' ? toneNote : undefined,
+      keyFacts: typeof keyFacts === 'string' ? keyFacts : undefined,
     },
     pillars,
   )

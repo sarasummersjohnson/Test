@@ -34,8 +34,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400, headers })
   }
 
-  const { accessCode, orgName, missionStatement, event, toneNote, startDate, weeks, postsPerWeek } =
-    body ?? {}
+  const {
+    accessCode,
+    orgName,
+    missionStatement,
+    event,
+    toneNote,
+    keyFacts,
+    startDate,
+    weeks,
+    postsPerWeek,
+  } = body ?? {}
 
   if (typeof accessCode !== 'string' || !accessCode.trim()) {
     return NextResponse.json({ error: 'Access code is required.' }, { status: 401, headers })
@@ -101,6 +110,7 @@ export async function POST(req: NextRequest) {
       missionStatement: typeof missionStatement === 'string' ? missionStatement : undefined,
       event: typeof event === 'string' ? event : undefined,
       toneNote: typeof toneNote === 'string' ? toneNote : undefined,
+      keyFacts: typeof keyFacts === 'string' ? keyFacts : undefined,
     },
     slots.map((slot, i) => ({ index: i + 1, date: slot.date, pillar: pillarByKey.get(slot.pillarKey)! })),
   )

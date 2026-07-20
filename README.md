@@ -60,6 +60,10 @@ To add a 6th consultant, add one line to `ACCESS_CODES` in `lib/accessCodes.ts`.
 - System prompt and user-message template: `lib/prompts.ts`
 - Model / `max_tokens`: `app/api/generate/route.ts` (currently `claude-sonnet-4-6`, `max_tokens: 1000`)
 
+### "Details to include" field
+
+Both forms have an optional **Details to include** field — free text for real names, quotes, or numbers (e.g. answers from a client intake survey) that should actually appear in the captions. Without it, the model either writes generically or inserts a `[STAT]` placeholder rather than inventing a number (per the system prompt). With it, the prompt tells the model to pull whichever detail best fits each pillar and never invent beyond what's provided — see the "Details to draw from" block in `buildUserMessage`/`buildCalendarUserMessage` in `lib/prompts.ts`.
+
 ## Local development
 
 ```bash
