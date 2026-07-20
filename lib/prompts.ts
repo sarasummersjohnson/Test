@@ -34,7 +34,7 @@ Mission: ${mission}
 Upcoming event/campaign: ${event}
 Tone note: ${tone}
 
-Generate one caption for each of the following content pillars:
+Generate one complete, ready-to-post caption for each of the following content pillars. Each caption must be the full text a social media manager would copy and paste directly into a post — never a headline, title, summary, or description of what the caption should say. Ground each caption specifically in that pillar's description below, not just its name.
 ${pillarList}
 
 Respond ONLY with a JSON array, no markdown code fences, no preamble or explanation. Each item must be shaped as: {"pillar": "<pillar key>", "caption": "<caption text>"}`
@@ -71,7 +71,7 @@ Mission: ${mission}
 Upcoming event/campaign: ${event}
 Tone note: ${tone}
 
-Generate one caption for each scheduled post below, in order. Each post is dated and assigned a content pillar — write a caption appropriate to that specific pillar. Keep voice and tone consistent across the whole calendar, and avoid repeating the same phrasing or opening line across posts.
+Generate one complete, ready-to-post caption for each scheduled post below, in order. Each caption must be the full text a social media manager would copy and paste directly into a post — never a headline, title, summary, or description of what the caption should say. Each post is dated and assigned a content pillar — ground the caption specifically in that pillar's description, not just its name. Keep voice and tone consistent across the whole calendar, and avoid repeating the same phrasing or opening line across posts.
 ${postList}
 
 Respond ONLY with a JSON array, no markdown code fences, no preamble or explanation. Each item must be shaped as: {"index": <post number>, "caption": "<caption text>"}`
