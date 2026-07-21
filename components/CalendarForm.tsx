@@ -9,6 +9,14 @@ const DEFAULT_POSTS_PER_WEEK = 2
 const DEFAULT_WEEKS = 4
 const MIN_WEEKS = 1
 const MAX_WEEKS = 13 // a fiscal quarter: 52-week year / 4
+const MAX_EVENTS = 12
+
+type EventRow = {
+  id: number
+  name: string
+  date: string
+  hasSponsors: boolean
+}
 
 type Props = {
   accessCode: string
@@ -18,6 +26,8 @@ type Props = {
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10)
 }
+
+let nextEventRowId = 1
 
 export default function CalendarForm({ accessCode, onResults }: Props) {
   const [orgName, setOrgName] = useState('')
@@ -32,6 +42,8 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
 
   const [postsPerWeek, setPostsPerWeek] = useState<number>(DEFAULT_POSTS_PER_WEEK)
   const [postsPerWeekWarning, setPostsPerWeekWarning] = useState<string | null>(null)
+
+  const [events, setEvents] = useState<EventRow[]>([])
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -81,6 +93,17 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
     if (Number.isNaN(postsPerWeek)) setPostsPerWeek(DEFAULT_POSTS_PER_WEEK)
   }
 
+  function addEventRow() {
+    if (events.length >= MAX_EVENTS) return
+    setEvents((prev) => [...prev, { id: nextEventRowId++, name: '', date: startDate, hasSponsors: false }])
+  }
+  function removeEventRow(id: number) {
+    setEvents((prev) => prev.filter((row) => row.id !== id))
+  }
+  function updateEventRow(id: number, patch: Partial<Omit<EventRow, 'id'>>) {
+    setEvents((prev) => prev.map((row) => (row.id === id ? { ...row, ...patch } : row)))
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
@@ -92,6 +115,13 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
     if (!startDate) {
       setError('Start date is required.')
       return
+    }
+    const namedEvents = events.filter((row) => row.name.trim())
+    for (const row of namedEvents) {
+      if (!row.date) {
+        setError(`Event "${row.name.trim()}" needs a date.`)
+        return
+      }
     }
 
     const safeWeeks = Number.isNaN(weeks) ? DEFAULT_WEEKS : weeks
@@ -112,6 +142,11 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
           startDate,
           weeks: safeWeeks,
           postsPerWeek: safePostsPerWeek,
+          events: namedEvents.map((row) => ({
+            name: row.name.trim(),
+            date: row.date,
+            hasSponsors: row.hasSponsors,
+          })),
         }),
       })
       const data = await res.json()
@@ -145,12 +180,12 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
       </label>
 
       <label>
-        Upcoming event or campaign
+        Upcoming event or campaign (general context)
         <textarea
           value={event}
           onChange={(e) => setEvent(e.target.value)}
           rows={2}
-          placeholder="Optional"
+          placeholder="Optional — loose context for tone/flavor. For posts scheduled around a real event date, use the Events section below instead."
         />
       </label>
 
@@ -203,6 +238,48 @@ export default function CalendarForm({ accessCode, onResults }: Props) {
         />
         {postsPerWeekWarning && <span className="field-warning">{postsPerWeekWarning}</span>}
       </label>
+
+      <fieldset>
+        <legend>Events (optional)</legend>
+        <p className="field-hint">
+          Each event gets its own Pre-Event / Event / Post-Event arc built around its real date.
+          Weeks with no events fall back to steady-state content. Must fall within the start
+          date / weeks range above.
+        </p>
+        {events.map((row) => (
+          <div key={row.id} className="event-row">
+            <input
+              value={row.name}
+              onChange={(e) => updateEventRow(row.id, { name: e.target.value })}
+              placeholder="Event name"
+              className="event-row-name"
+            />
+            <input
+              type="date"
+              value={row.date}
+              onChange={(e) => updateEventRow(row.id, { date: e.target.value })}
+            />
+            <label className="checkbox event-row-sponsors">
+              <input
+                type="checkbox"
+                checked={row.hasSponsors}
+                onChange={(e) => updateEventRow(row.id, { hasSponsors: e.target.checked })}
+              />
+              Has sponsors
+            </label>
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => removeEventRow(row.id)}
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button type="button" onClick={addEventRow} disabled={events.length >= MAX_EVENTS}>
+          + Add event
+        </button>
+      </fieldset>
 
       {error && <p className="error">{error}</p>}
 

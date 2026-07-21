@@ -1,19 +1,30 @@
-// Server-side only. Column structure matches the client's existing content-
-// calendar delivery template: Date, Pillar, Track, Visual Label,
-// Visual/Template Needed, Caption, Notes.
-//
-// "Visual Label" and "Visual/Template Needed" describe what creative asset
-// a post needs — a judgment call made by whoever's building the visuals,
-// not something inferred from the pillar/caption alone — so those columns
-// (and Notes) are left blank for manual completion after export.
+// Server-side only. Columns match the client's content-calendar delivery
+// template, extended for platform-specific captions and event phasing:
+// Date, Phase, Pillar, Track, Visual Label, Visual/Template Needed,
+// Caption_X, Caption_TikTok, Caption_Instagram, Caption_Facebook,
+// Caption_LinkedIn, Notes.
 
 import ExcelJS from 'exceljs'
 
 export type CalendarPostRow = {
   date: string // YYYY-MM-DD
+  phase: string
   pillarLabel: string
-  category: 'membership' | 'donor'
-  caption: string
+  category: 'membership' | 'donor' | 'event'
+  visualTemplate: string
+  visualLabel: string
+  captionX: string
+  captionTikTok: string
+  captionInstagram: string
+  captionFacebook: string
+  captionLinkedin: string
+  notes: string
+}
+
+function trackLabel(category: CalendarPostRow['category']): string {
+  if (category === 'membership') return 'Membership'
+  if (category === 'donor') return 'Donor'
+  return 'Event'
 }
 
 export async function buildCalendarWorkbook(rows: CalendarPostRow[]): Promise<Buffer> {
@@ -25,24 +36,34 @@ export async function buildCalendarWorkbook(rows: CalendarPostRow[]): Promise<Bu
 
   sheet.columns = [
     { header: 'Date', key: 'date', width: 14 },
+    { header: 'Phase', key: 'phase', width: 14 },
     { header: 'Pillar', key: 'pillar', width: 22 },
-    { header: 'Track', key: 'track', width: 14 },
-    { header: 'Visual Label', key: 'visualLabel', width: 24 },
-    { header: 'Visual/Template Needed', key: 'visualTemplateNeeded', width: 28 },
-    { header: 'Caption', key: 'caption', width: 90 },
-    { header: 'Notes', key: 'notes', width: 30 },
+    { header: 'Track', key: 'track', width: 12 },
+    { header: 'Visual Label', key: 'visualLabel', width: 32 },
+    { header: 'Visual/Template Needed', key: 'visualTemplate', width: 24 },
+    { header: 'Caption_X', key: 'captionX', width: 40 },
+    { header: 'Caption_TikTok', key: 'captionTikTok', width: 40 },
+    { header: 'Caption_Instagram', key: 'captionInstagram', width: 40 },
+    { header: 'Caption_Facebook', key: 'captionFacebook', width: 40 },
+    { header: 'Caption_LinkedIn', key: 'captionLinkedin', width: 60 },
+    { header: 'Notes', key: 'notes', width: 40 },
   ]
   sheet.getRow(1).font = { bold: true }
 
   for (const row of rows) {
     const addedRow = sheet.addRow({
       date: row.date,
+      phase: row.phase,
       pillar: row.pillarLabel,
-      track: row.category === 'membership' ? 'Membership' : 'Donor',
-      visualLabel: '',
-      visualTemplateNeeded: '',
-      caption: row.caption,
-      notes: '',
+      track: trackLabel(row.category),
+      visualLabel: row.visualLabel,
+      visualTemplate: row.visualTemplate,
+      captionX: row.captionX,
+      captionTikTok: row.captionTikTok,
+      captionInstagram: row.captionInstagram,
+      captionFacebook: row.captionFacebook,
+      captionLinkedin: row.captionLinkedin,
+      notes: row.notes,
     })
     addedRow.alignment = { wrapText: true, vertical: 'top' }
   }

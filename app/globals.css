@@ -263,6 +263,43 @@ select {
   color: #9a6700;
 }
 
+.field-hint {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.event-row-name {
+  flex: 2;
+}
+
+.event-row input[type='date'] {
+  flex: 1;
+  min-width: 150px;
+}
+
+.event-row-sponsors {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-weight: 400;
+}
+
+.caption-form fieldset button[type='button'] {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
 .calendar-toolbar {
   display: flex;
   align-items: center;

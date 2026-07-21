@@ -31,9 +31,18 @@ export async function POST(req: NextRequest) {
 
   const rows: CalendarPostRow[] = posts.map((post: any) => ({
     date: typeof post?.date === 'string' ? post.date : '',
+    phase: typeof post?.phase === 'string' ? post.phase : '',
     pillarLabel: typeof post?.pillarLabel === 'string' ? post.pillarLabel : '',
-    category: post?.category === 'donor' ? 'donor' : 'membership',
-    caption: typeof post?.caption === 'string' ? post.caption : '',
+    category:
+      post?.category === 'donor' ? 'donor' : post?.category === 'event' ? 'event' : 'membership',
+    visualTemplate: typeof post?.visualTemplate === 'string' ? post.visualTemplate : '',
+    visualLabel: typeof post?.visualLabel === 'string' ? post.visualLabel : '',
+    captionX: typeof post?.captionX === 'string' ? post.captionX : '',
+    captionTikTok: typeof post?.captionTikTok === 'string' ? post.captionTikTok : '',
+    captionInstagram: typeof post?.captionInstagram === 'string' ? post.captionInstagram : '',
+    captionFacebook: typeof post?.captionFacebook === 'string' ? post.captionFacebook : '',
+    captionLinkedin: typeof post?.captionLinkedin === 'string' ? post.captionLinkedin : '',
+    notes: typeof post?.notes === 'string' ? post.notes : '',
   }))
 
   const buffer = await buildCalendarWorkbook(rows)

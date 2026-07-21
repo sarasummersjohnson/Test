@@ -62,7 +62,36 @@ export const DONOR_PILLARS: Pillar[] = [
   },
 ]
 
+// Event-anchored pillars. Only reachable through the Posting Calendar's
+// event-phase engine (lib/calendarSequencing.ts) — never selectable via
+// Single Batch mode's content-type/pillar checkboxes, so they're kept out
+// of MEMBERSHIP_PILLARS/DONOR_PILLARS and out of pillarsPublic.ts entirely.
+export const EVENT_PILLARS: Pillar[] = [
+  {
+    key: 'beneficiary',
+    label: 'Beneficiary Story',
+    description:
+      'A real or anonymized story about the person or family helped by a specific gift or program — centers who benefits, not who gives.',
+  },
+  {
+    key: 'sponsor-recruit',
+    label: 'Sponsorship Recruitment',
+    description:
+      'A direct pitch inviting local businesses to sponsor a specific upcoming event — a B2B ask, distinct from the individual donor Ask.',
+  },
+  {
+    key: 'sponsor-thanks',
+    label: 'Sponsor Thank-You',
+    description:
+      'A public post naming and thanking confirmed event sponsors by name, posted after the event.',
+  },
+]
+
 export const ALL_PILLARS: Pillar[] = [...MEMBERSHIP_PILLARS, ...DONOR_PILLARS]
+
+// Every pillar the event-anchored calendar engine can reach, including the
+// original 8. Used for pillar-key -> Pillar lookups in that engine.
+export const ALL_PILLARS_INCLUDING_EVENT: Pillar[] = [...ALL_PILLARS, ...EVENT_PILLARS]
 
 export type ContentType = 'Membership' | 'Donor' | 'Combined'
 

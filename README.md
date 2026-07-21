@@ -10,19 +10,53 @@ Password-protected internal tool for generating social media captions for nonpro
 - **`app/api/generate-calendar/route.ts`** — posting-calendar generation (see below).
 - **`app/api/generate-calendar/export/route.ts`** — formats an already-generated calendar into a downloadable `.xlsx`. Pure formatting, no Claude call.
 - **`lib/pillars.ts`** and **`lib/prompts.ts`** — server-only. These hold the actual pillar descriptions and system/user prompt templates (the "core IP") and are only ever imported from API route files, so they never end up in the client JS bundle. `lib/pillarsPublic.ts` holds just the pillar keys/labels needed to render the Combined-content checkboxes client-side.
-- **`lib/calendarSequencing.ts`** — pure date/pillar-sequencing logic for the posting calendar (no prompt content, so it carries no IP).
+- **`lib/calendarSequencing.ts`** — event-anchored date/pillar-sequencing logic for the posting calendar (pillar keys only, no descriptions, so it carries no IP on its own).
+- **`lib/visualTemplates.ts`** — deterministic pillar → creative-template lookup (Visual/Template Needed column).
 - **`lib/excelExport.ts`** — builds the `.xlsx` workbook for calendar downloads.
 - **`lib/usage.ts`** — usage counters, stored in Upstash Redis (see below).
 
 ## Posting calendar mode
 
-Given a start date, a number of weeks, and posts per week, this generates a full content calendar in one shot instead of one caption at a time:
+Given a start date, number of weeks, posts per week, and optionally a list of real events, this generates a full content calendar — dates, pillars, platform-specific captions, and visual guidance — in one shot.
 
-1. **Sequencing** (`lib/calendarSequencing.ts`, runs server-side before any model call): dates are spread evenly across each week (e.g. at 2/week, posts land ~3-4 days apart); pillars are assigned in a repeating membership/membership/donor pattern — an exact 2:1 ratio for post counts divisible by 3, close to it otherwise — and the same specific pillar is never assigned to two posts in a row.
-2. **One batched Claude call**: every post's date + pillar is included in a single prompt, and the model returns a JSON array of `{index, caption}` for the whole calendar at once — not one API call per post. This keeps voice consistent across the batch and is far cheaper than N separate calls. `max_tokens` scales with the number of posts (roughly 130 tokens/post + overhead, capped at 8000) so longer calendars don't get truncated.
-3. **Excel export**: the generated posts (already in the browser, no re-generation) are POSTed to `/api/generate-calendar/export`, which returns an `.xlsx` with columns **Date, Pillar, Track, Visual Label, Visual/Template Needed, Caption, Notes** — one row per post, matching the existing client-delivery template. `Visual Label`, `Visual/Template Needed`, and `Notes` are left blank on export (creative-asset selection is a manual step); everything else is filled in. See `lib/excelExport.ts` if the template ever changes.
+### Pillars
 
-**Validation:** Posts per week is clamped to **1–5** (default 2) both client-side (as you type, with an inline message if you go out of range) and server-side (the API rejects out-of-range or non-integer values even if a client bypasses the UI). Number of weeks is similarly bounded to **1–13** (a fiscal quarter — 52-week year / 4) — this cap exists because the whole calendar is generated in a single non-streaming API call, and an unbounded calendar length risks truncated output or a request that runs long enough to hit a serverless function timeout. Both bounds live at the top of `app/api/generate-calendar/route.ts` if you want to change them.
+11 total. The original 8 (`lib/pillars.ts`, `MEMBERSHIP_PILLARS`/`DONOR_PILLARS`) plus 3 event-only pillars (`EVENT_PILLARS`) reachable only through the calendar's event-phase engine, never through Single Batch mode's content-type/pillar checkboxes:
+
+- **Beneficiary Story** (`beneficiary`) — a real or anonymized story about who a gift or program helped.
+- **Sponsorship Recruitment** (`sponsor-recruit`) — a B2B pitch inviting local businesses to sponsor a specific event.
+- **Sponsor Thank-You** (`sponsor-thanks`) — publicly naming and thanking confirmed event sponsors.
+
+### Sequencing (`lib/calendarSequencing.ts`)
+
+Runs entirely server-side before any model call — no Claude involvement in deciding dates/pillars, only in writing the captions once the schedule is fixed.
+
+- **Events** (optional, up to 12, each `{name, date, hasSponsors}`) each get a 3-phase arc built around their real date:
+  - *Pre-Event*: Sponsorship Recruitment (if sponsors flagged) at ~90/60/30 days before — touchpoints that would fall before the calendar's start date are dropped rather than shifted, with a note flagging the compressed timeline (attached to another real post for that event if literally none of the three fit); Event Promo at ~7 days before, clamped to the calendar's start date if the event is closer than that.
+  - *Event*: one real-time/presence post on the event date itself.
+  - *Post-Event*: Sponsor Thank-You (if flagged) ~1 day after; a Spotlight/testimonial ~6 days after, where the model picks whichever of Member Spotlight / Donor Recognition / Beneficiary Story best fits that event's provided details (not hardcoded).
+- **Steady-State floor**: any week with no event activity rotates Myth-Busting / [Community Impact, weighted 2:1 over Impact Proof] / The Ask, with the same specific pillar never landing on two posts in a row. Note on the ratio: Myth-Busting (membership) and The Ask (donor) are fixed in this 3-slot cycle, which is already 1:1 on its own — a true 50/50 split on the third slot would cap the whole rotation at 1:1, and an exact 2:1 would require Impact Proof to never appear at all. The 2:1-weighted (not 50/50) alternation is a deliberate compromise leaning membership-heavy without freezing Impact Proof out — adjust the weights in `generateSteadyStateSlots` if you want either extreme instead.
+- Weeks containing any event content are owned entirely by that event — no steady-state posts are added on top. Start Date + Number of Weeks still define the calendar's overall span; Posts-per-week governs steady-state cadence specifically.
+
+### Generation
+
+One batched Claude call covers every post. For each post the model writes **5 platform-specific caption variants** (not one caption copy-pasted five times — same underlying pillar/message, adapted per platform) plus one AI-written **Visual Label** (a specific note on what photo/visual that post needs). Platform specs live in `lib/prompts.ts` (`buildEventCalendarUserMessage`):
+
+| Field | Target | Notes |
+|---|---|---|
+| `caption_x` | 71–100 chars | Punchy, 1-2 hashtags, timely/casual |
+| `caption_tiktok` | short, well under 4,000 chars | Hook-driven; supports the video, not standalone |
+| `caption_instagram` | 138–150 chars | Hook must land in the first ~125 chars before "more" truncates |
+| `caption_facebook` | 40–80 chars | Shorter than expected; 0-3 hashtags, direct/community tone |
+| `caption_linkedin` | 800–1,600 chars | Professional, story/insight-led |
+
+`Visual/Template Needed` (which of 6 fixed templates — Spotlight, Event/Ask, Impact/Stat, Myth-bust/Trust, Flex/General, Video/Reel) is a deterministic pillar lookup in `lib/visualTemplates.ts`, not AI-generated — Video/Reel is a manual editorial flag, not auto-assigned. `max_tokens` scales with post count and platform-variant volume (~550 tokens/post, up to 64,000) and the request streams under the hood (`stream().finalMessage()`) so a large calendar can't hit the SDK's non-streaming timeout guard — the API still returns one JSON response either way, no client-side change.
+
+### Excel export
+
+`/api/generate-calendar/export` returns an `.xlsx` with columns **Date, Phase, Pillar, Track, Visual Label, Visual/Template Needed, Caption_X, Caption_TikTok, Caption_Instagram, Caption_Facebook, Caption_LinkedIn, Notes** — one row per post, matching the client-delivery template. `Phase` is Pre-Event / Event / Post-Event / Steady-State. `Notes` carries auto-generated context (which event a post belongs to, compressed-timeline flags) and stays blank for steady-state posts; still human-editable after export.
+
+**Validation:** Posts per week is clamped to **1–5** (default 2), Number of weeks to **1–13** (a fiscal quarter), and Events to **12 max** — all enforced client-side (inline messages) and server-side (the API rejects out-of-range values regardless of what the client sends). Every event's date must fall within the selected Start Date/Weeks span, or the request is rejected with a clear error naming the offending event. Bounds live at the top of `app/api/generate-calendar/route.ts`.
 
 ## Environment variables
 

@@ -5,16 +5,31 @@ import { useState } from 'react'
 export type CalendarPost = {
   index: number
   date: string
+  phase: string
+  eventName: string | null
   pillarKey: string
   pillarLabel: string
-  category: 'membership' | 'donor'
-  caption: string
+  category: 'membership' | 'donor' | 'event'
+  visualTemplate: string
+  visualLabel: string
+  captionX: string
+  captionTikTok: string
+  captionInstagram: string
+  captionFacebook: string
+  captionLinkedin: string
+  notes: string
 }
 
 type Props = {
   accessCode: string
   orgName: string
   posts: CalendarPost[]
+}
+
+function trackLabel(category: CalendarPost['category']): string {
+  if (category === 'membership') return 'Membership'
+  if (category === 'donor') return 'Donor'
+  return 'Event'
 }
 
 export default function CalendarResults({ accessCode, orgName, posts }: Props) {
@@ -53,7 +68,7 @@ export default function CalendarResults({ accessCode, orgName, posts }: Props) {
     }
   }
 
-  const missingCount = posts.filter((p) => !p.caption.trim()).length
+  const missingCount = posts.filter((p) => !p.captionX.trim() && !p.captionLinkedin.trim()).length
 
   return (
     <div className="results">
@@ -63,7 +78,7 @@ export default function CalendarResults({ accessCode, orgName, posts }: Props) {
         </button>
         {missingCount > 0 && (
           <p className="error">
-            {missingCount} of {posts.length} posts came back without a caption — you may want to
+            {missingCount} of {posts.length} posts came back without captions — you may want to
             regenerate.
           </p>
         )}
@@ -74,18 +89,34 @@ export default function CalendarResults({ accessCode, orgName, posts }: Props) {
           <thead>
             <tr>
               <th>Date</th>
+              <th>Phase</th>
               <th>Pillar</th>
-              <th>Category</th>
-              <th>Caption</th>
+              <th>Track</th>
+              <th>Visual Label</th>
+              <th>Template</th>
+              <th>X</th>
+              <th>TikTok</th>
+              <th>Instagram</th>
+              <th>Facebook</th>
+              <th>LinkedIn</th>
+              <th>Notes</th>
             </tr>
           </thead>
           <tbody>
             {posts.map((post) => (
               <tr key={post.index}>
                 <td>{post.date}</td>
+                <td>{post.phase}</td>
                 <td>{post.pillarLabel}</td>
-                <td>{post.category === 'membership' ? 'Membership' : 'Donor'}</td>
-                <td>{post.caption || '—'}</td>
+                <td>{trackLabel(post.category)}</td>
+                <td>{post.visualLabel || '—'}</td>
+                <td>{post.visualTemplate}</td>
+                <td>{post.captionX || '—'}</td>
+                <td>{post.captionTikTok || '—'}</td>
+                <td>{post.captionInstagram || '—'}</td>
+                <td>{post.captionFacebook || '—'}</td>
+                <td>{post.captionLinkedin || '—'}</td>
+                <td>{post.notes || '—'}</td>
               </tr>
             ))}
           </tbody>
